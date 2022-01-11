@@ -47,7 +47,16 @@ export default function Registrations() {
     if (res.data.error) {
       console.log(res.data.error);
     } else {
-      window.location.reload();
+      let temp = registrations;
+
+      registrations.map((v, i) => {
+        if (v._id === id) {
+          temp[i].status = "Approved";
+        }
+      });
+
+      setRegistrations(temp);
+      setRender(!render);
     }
   };
 
@@ -57,6 +66,15 @@ export default function Registrations() {
     if (res.data.error) {
       console.log(res.data.error);
     } else {
+      let temp = registrations;
+
+      registrations.map((v, i) => {
+        if (v._id === id) {
+          temp[i].status = "Rejected";
+        }
+      });
+
+      setRegistrations(temp);
       setRender(!render);
     }
   };
@@ -77,7 +95,7 @@ export default function Registrations() {
 
                   <div className="reg-single-mid">
                     <h6>
-                      Event Date: {v.event.date} Event Price: {v.event.price}$
+                      Event Date: {v.event.date} Event Price: {v.event.price}{" "}
                       User email: {v.user.email} Event Status:{" "}
                       {v.status === "Pending" && (
                         <span className="pending">{v.status}</span>

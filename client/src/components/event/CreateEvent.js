@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { Alert, Button } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import base from "../../config";
 import Header from "../core/Header";
 import Avatar from "../../assets/Avatar.png";
@@ -10,7 +10,7 @@ export default function CreateEvent() {
   const [values, setValues] = useState({
     title: "",
     description: "",
-    price: 0.0,
+    price: "",
     date: "",
     category: "",
     error: "",
@@ -18,6 +18,7 @@ export default function CreateEvent() {
   });
   const [img, setImg] = useState({});
   const [file, setFile] = useState(Avatar);
+  const [message, setMessage] = useState("");
 
   useEffect(async () => {
     if (!sessionStorage.getItem("id")) return window.location.assign("/");
@@ -33,8 +34,76 @@ export default function CreateEvent() {
   const submitHandle = async () => {
     let newEvent = new FormData();
 
+    if (
+      values.title === "" ||
+      values.description === "" ||
+      values.price === "" ||
+      values.price === "" ||
+      values.date === "" ||
+      values.category === ""
+    ) {
+      return setValues({
+        ...values,
+        error: "The event is missing required information",
+      });
+    }
+
+    if (!img.lastModified) {
+      return setValues({
+        ...values,
+        error: "The event is missing required information",
+      });
+    }
+
     if (values.category !== "Course" && values.category !== "Meetup") {
       return setValues({ ...values, error: "Choose a valid category" });
+    }
+
+    if (values.price !== "0") {
+      const match = /^\d+\.?\d[0-2][$€]$/;
+
+      const boolean = match.test(values.price);
+
+      if (!boolean) {
+        return setValues({
+          ...values,
+          error: "Event Price Should look like this: 1000.00€",
+        });
+      }
+    }
+
+    const now = new Date();
+    const day = now.getDate();
+    let month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    let userDate = values.date.split("-");
+
+    const yearCheck = userDate[0] - year;
+
+    if (yearCheck < 0) {
+      return setValues({
+        ...values,
+        error: "That Date Already Passed",
+      });
+    }
+
+    const monthCheck = userDate[1] - month;
+
+    if (monthCheck < 0) {
+      return setValues({
+        ...values,
+        error: "That Date Already Passed",
+      });
+    }
+
+    const dateCheck = userDate[2] - day;
+
+    if (dateCheck < 0) {
+      return setValues({
+        ...values,
+        error: "That Date Already Passed",
+      });
     }
 
     img && newEvent.append("img", img);
@@ -50,7 +119,11 @@ export default function CreateEvent() {
     if (response.data.error) {
       setValues({ ...values, error: response.data.error });
     } else {
-      setValues({ ...values, error: "", redirect: true });
+      setMessage("The event was created successfully!");
+      setValues({ ...values, error: "" });
+      setTimeout(() => {
+        window.location.assign("/dashboard");
+      }, 1500);
     }
   };
 
@@ -136,7 +209,7 @@ export default function CreateEvent() {
 
             <div className="form-group">
               <input
-                type="datetime-local"
+                type="date"
                 className="form-control"
                 placeholder="Enter date"
                 onChange={(e) => setValues({ ...values, date: e.target.value })}
@@ -145,7 +218,7 @@ export default function CreateEvent() {
 
             <div className="form-group">
               <input
-                type="number"
+                type="text"
                 className="form-control"
                 placeholder="Enter price"
                 step="0.01"
@@ -158,6 +231,8 @@ export default function CreateEvent() {
             <div>
               {values.error && <Alert variant="danger">{values.error}</Alert>}
             </div>
+
+            <div>{message && <Alert variant="success">{message}</Alert>}</div>
 
             <div className="login-buttons">
               <div>

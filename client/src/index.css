@@ -69,17 +69,17 @@ body {
 .dashboard-mapping {
   display: grid;
   grid-template-columns: auto auto;
+  gap: 5rem;
 }
 
 .single {
-  height: fit-content;
-  margin-bottom: 2rem;
+  height: 100%;
   margin-right: 15%;
 }
 
 .single > img {
-  width: 75%;
-  height: 60%;
+  width: 400px;
+  height: 400px;
 }
 
 .single-info > h4 {
@@ -162,7 +162,7 @@ body {
   color: red;
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 896px) {
   body,
   * {
     font-size: 15px;
@@ -173,13 +173,30 @@ body {
     margin-left: 25%;
     width: 100%;
   }
-}
 
+  .single{
+    margin-bottom: 2.5rem;
+  }
+
+  .single>img{
+    width: 75%;
+    height: 75%;
+  }
+}
 
 @media only screen and (max-width: 731px) {
   body,
   * {
     font-size: 12px;
+  }
+
+  .single{
+    margin-bottom: 2.5rem;
+  }
+
+  .single>img{
+    width: 75%;
+    height: 75%;
   }
 }
 

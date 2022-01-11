@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import base from "../../config";
 import Header from "../core/Header";
 import Avatar from "../../assets/Avatar.png";
-import { Modal, ModalTitle, ModalBody } from "react-bootstrap";
+import { Modal, ModalTitle, ModalBody, Alert } from "react-bootstrap";
 import { io } from "socket.io-client";
 
 export default function Dashboard() {
@@ -23,6 +23,10 @@ export default function Dashboard() {
   const [modal, setModal] = useState(false);
   const [eventId, setEventId] = useState("");
   const [registrations, setRegistrations] = useState({});
+  const [updates, setUpdates] = useState({
+    error: "",
+    success: "",
+  });
 
   socket.on("new-registration", (data) => {
     if (data.user._id !== user._id) {
@@ -45,11 +49,8 @@ export default function Dashboard() {
     let response = await axios.post(`${base}/api/user/events`, { id: id });
 
     setAll(response.data);
+    setRegistrations({});
   }, []);
-
-  useEffect(() => {
-    console.log(registrations);
-  }, [registrations]);
 
   useEffect(async () => {
     if (choice === "all") {
@@ -80,7 +81,7 @@ export default function Dashboard() {
       let response = await axios.get(`${base}/dashboard/Course`);
 
       if (response.data.error) {
-        console.log(error);
+        setUpdates({ ...updates, error: response.data.error });
       } else {
         setCourses(response.data);
         setEvents([]);
@@ -91,7 +92,7 @@ export default function Dashboard() {
       let response = await axios.get(`${base}/dashboard/Meetup`);
 
       if (response.data.error) {
-        console.log(error);
+        setUpdates({ ...updates, error: response.data.error });
       } else {
         setMeetUps(response.data);
         setEvents([]);
@@ -105,9 +106,18 @@ export default function Dashboard() {
     let response = await axios.delete(`${base}/event/${eventId}`);
 
     if (response.data.error) {
-      console.log(response.data.error);
+      setUpdates({
+        ...updates,
+        error: "An error occurred when deleting the event!",
+      });
     } else {
-      window.location.reload();
+      setUpdates({
+        ...updates,
+        success: "The event was deleted successfully!",
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     }
   };
 
@@ -121,9 +131,26 @@ export default function Dashboard() {
     let response = await axios.post(`${base}/registration`, newRegistration);
     socket.emit("new", "new");
 
+    let eventName = "";
+
+    axios.get(`${base}/event/${id}`).then((res) => {
+      if (res.data.error) {
+        console.log(res.data.error);
+      } else {
+        eventName = res.data.title;
+      }
+    });
+
     if (response.data.error) {
-      console.log(response.data.error);
+      setUpdates({
+        ...updates,
+        error: `The request for the event ${eventName} was not successful!`,
+      });
     } else {
+      setUpdates({
+        ...updates,
+        success: `The request for the event ${eventName} was successful!`,
+      });
       socket.emit("added-registration", newRegistration);
     }
   };
@@ -134,7 +161,7 @@ export default function Dashboard() {
     );
 
     if (res.data.error) {
-      return console.log(res.data.error);
+      return setUpdates({ ...updates, error: res.data.error });
     }
 
     setRegistrations(res.data);
@@ -146,7 +173,7 @@ export default function Dashboard() {
     );
 
     if (res.data.error) {
-      return console.log(res.data.error);
+      return setUpdates({ ...updates, error: res.data.error });
     }
 
     setRegistrations(res.data);
@@ -200,6 +227,36 @@ export default function Dashboard() {
               </a>
             </div>
           </div>
+        </div>
+
+        <div>
+          {updates.error && (
+            <Alert
+              variant="danger"
+              style={{
+                textAlign: "center",
+                marginLeft: "15%",
+                marginRight: "15%",
+              }}
+            >
+              {updates.error}
+            </Alert>
+          )}
+        </div>
+
+        <div>
+          {updates.success && (
+            <Alert
+              variant="success"
+              style={{
+                textAlign: "center",
+                marginLeft: "15%",
+                marginRight: "15%",
+              }}
+            >
+              {updates.success}
+            </Alert>
+          )}
         </div>
 
         <div className="reg-flex" style={{ marginBottom: "2rem" }}>
@@ -268,7 +325,8 @@ export default function Dashboard() {
                     <div className="single-info">
                       <h4>Event title: {v.title}</h4>
                       <p>Event description: {v.description}</p>
-                      <p>Event price: {parseFloat(v.price).toFixed(2)}</p>
+                      <p>Event date: {v.date}</p>
+                      <p>Event price: {v.price}</p>
                       <p>Event category: {v.category}</p>
                     </div>
                     <div className="single-button">
@@ -316,7 +374,8 @@ export default function Dashboard() {
                     <div className="single-info">
                       <h4>Event title: {v.title}</h4>
                       <p>Event description: {v.description}</p>
-                      <p>Event price: {parseFloat(v.price).toFixed(2)}</p>
+                      <p>Event date: {v.date}</p>
+                      <p>Event price: {v.price}</p>
                       <p>Event category: {v.category}</p>
                     </div>
                     <div className="single-button">
@@ -364,11 +423,12 @@ export default function Dashboard() {
                     <div className="single-info">
                       <h4>Event title: {v.title}</h4>
                       <p>Event description: {v.description}</p>
-                      <p>Event price: {parseFloat(v.price).toFixed(2)}</p>
+                      <p>Event date: {v.date}</p>
+                      <p>Event price: {v.price}</p>
                       <p>Event category: {v.category}</p>
                     </div>
                     <div className="single-button">
-                      {user._id === v.creator ? (
+                      {user._id === v.creator._id ? (
                         <div>
                           <button
                             type="button"
@@ -412,11 +472,12 @@ export default function Dashboard() {
                     <div className="single-info">
                       <h4>Event title: {v.title}</h4>
                       <p>Event description: {v.description}</p>
-                      <p>Event price: {parseFloat(v.price).toFixed(2)}</p>
+                      <p>Event date: {v.date}</p>
+                      <p>Event price: {v.price}</p>
                       <p>Event category: {v.category}</p>
                     </div>
                     <div className="single-button">
-                      {user._id === v.creator ? (
+                      {user._id === v.creator._id ? (
                         <div>
                           <button
                             type="button"
@@ -457,6 +518,12 @@ export default function Dashboard() {
 
         <ModalBody>
           <div className="modal-top">Are You Sure?</div>
+
+          <div>
+            {updates.success && (
+              <Alert variant="success">{updates.success}</Alert>
+            )}
+          </div>
 
           <div className="modal-bottom">
             <button

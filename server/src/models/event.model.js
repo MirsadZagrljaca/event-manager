@@ -4,6 +4,10 @@ const EventSchema = new mongoose.Schema({
   title: {
     type: String,
     required: "Event Title is required",
+    match: [
+      /^[a-zA-Z]+$/,
+      "Event title can only contain letters, NO SPECIAL CHARACTERS NOR NUMBERS!",
+    ],
     trim: true,
   },
   description: {
@@ -12,8 +16,8 @@ const EventSchema = new mongoose.Schema({
     trim: true,
   },
   price: {
-    type: Number,
-    required: "Event Price is required"
+    type: String,
+    required: "Event Price is required",
   },
   date: {
     type: String,
