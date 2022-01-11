@@ -5,22 +5,12 @@ const UserSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: "First Name is required",
-    trim: true,
-    max: 10,
-    match: [
-      /^[a-zA-Z]+$/,
-      "First Name can only contain letters, NO SPECIAL CHARACTERS NOR NUMBERS!",
-    ],
+    trim: true
   },
   lastName: {
     type: String,
     required: "Last Name is required",
-    trim: true,
-    max: 10,
-    match: [
-      /^[a-zA-Z]+$/,
-      "Last Name can only contain letters, NO SPECIAL CHARACTERS NOR NUMBERS!",
-    ],
+    trim: true
   },
   email: {
     type: String,
