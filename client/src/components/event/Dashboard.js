@@ -121,7 +121,7 @@ export default function Dashboard() {
     }
   };
 
-  const registration = async (e, id) => {
+  const registration = async (e, id, title) => {
     let newRegistration = {
       user: user._id,
       event: id,
@@ -131,25 +131,15 @@ export default function Dashboard() {
     let response = await axios.post(`${base}/registration`, newRegistration);
     socket.emit("new", "new");
 
-    let eventName = "";
-
-    axios.get(`${base}/event/${id}`).then((res) => {
-      if (res.data.error) {
-        console.log(res.data.error);
-      } else {
-        eventName = res.data.title;
-      }
-    });
-
     if (response.data.error) {
       setUpdates({
         ...updates,
-        error: `The request for the event ${eventName} was not successful!`,
+        error: `The request for the event ${title} was not successful!`,
       });
     } else {
       setUpdates({
         ...updates,
-        success: `The request for the event ${eventName} was successful!`,
+        success: `The request for the event ${title} was successful!`,
       });
       socket.emit("added-registration", newRegistration);
     }
@@ -348,7 +338,7 @@ export default function Dashboard() {
                           <button
                             type="button"
                             className="btn btn-primary btn-lg btn-block"
-                            onClick={(e) => registration(e, v._id)}
+                            onClick={(e) => registration(e, v._id, v.title)}
                           >
                             Register
                           </button>
@@ -397,7 +387,7 @@ export default function Dashboard() {
                           <button
                             type="button"
                             className="btn btn-primary btn-lg btn-block"
-                            onClick={(e) => registration(e, v._id)}
+                            onClick={(e) => registration(e, v._id, v.title)}
                           >
                             Register
                           </button>
@@ -446,7 +436,7 @@ export default function Dashboard() {
                           <button
                             type="button"
                             className="btn btn-primary btn-lg btn-block"
-                            onClick={(e) => registration(e, v._id)}
+                            onClick={(e) => registration(e, v._id, v.title)}
                           >
                             Register
                           </button>
@@ -495,7 +485,7 @@ export default function Dashboard() {
                           <button
                             type="button"
                             className="btn btn-primary btn-lg btn-block"
-                            onClick={(e) => registration(e, v._id)}
+                            onClick={(e) => registration(e, v._id, v.title)}
                           >
                             Register
                           </button>
